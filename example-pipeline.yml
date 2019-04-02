@@ -1,0 +1,124 @@
+---
+resources:
+- name: repo
+  type: git
+  source:
+    uri: ((git_url))
+    branch: master
+- name: manage-cf
+  type: docker-image
+  source:
+    repository: kinja/pipeline-image
+- name: build-java
+  type: docker-image
+  source:
+    repository: openjdk
+    tag: 8-jdk
+
+jobs:
+- name: fourty-two
+  plan:
+  - aggregate:
+    - get: repo
+      trigger: true
+    - get: build-java
+    - get: manage-cf
+  - aggregate:
+    - task: build-code
+      params:
+        APP_NAME: ((app_name))
+      image: build-java
+      config:
+        platform: linux
+        inputs:
+        - name: repo
+        outputs:
+        - name: compiled-app
+        run:
+          path: /bin/bash
+          args:
+          - -exc
+          - |
+            export ROOT_FOLDER=$( pwd )
+            export GRADLE_USER_HOME="${ROOT_FOLDER}/.gradle"
+
+            export M2_HOME=${HOME}/.m2
+            mkdir -p ${M2_HOME}
+            
+            M2_LOCAL_REPO="${ROOT_FOLDER}/.m2"
+            
+            mkdir -p "${M2_LOCAL_REPO}/repository"
+            
+            cat > ${M2_HOME}/settings.xml <<EOF
+            
+            <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
+                                      https://maven.apache.org/xsd/settings-1.0.0.xsd">
+                  <localRepository>${M2_LOCAL_REPO}/repository</localRepository>
+            </settings>
+            
+            EOF
+
+            git clone repo "${APP_NAME}"
+            pushd "./${APP_NAME}"
+              ./gradlew build
+              cp "build/libs/${APP_NAME}"*.jar ../compiled-app
+            popd
+        caches:
+        - path: .gradle/
+        - path: .m2/
+    - task: fetch-manifest
+      params:
+        CF_API: ((cf_api))
+        CF_USERNAME: ((cf_username))
+        CF_PASSWORD: ((cf_password))
+        CF_ORG: ((cf_org))
+        CF_SPACE: ((cf_space))
+        APP_NAME: ((app_name))
+      image: manage-cf
+      config:
+        platform: linux
+        outputs:
+        - name: manifest
+        run:
+          path: /bin/bash
+          args:
+          - -exc
+          - |
+            cf api "${CF_API}" --skip-ssl-validation
+            cf login -u "${CF_USERNAME}" -p "${CF_PASSWORD}"
+
+            cf t -o "${CF_ORG}" -s "${CF_SPACE}"
+
+            cf create-app-manifest "${APP_NAME}" -p ./manifest/manifest.yml
+  - task: push-app
+    params:
+      CF_API: ((cf_api))
+      CF_USERNAME: ((cf_username))
+      CF_PASSWORD: ((cf_password))
+      CF_ORG: ((cf_org))
+      CF_SPACE: ((cf_space))
+      APP_NAME: ((app_name))
+    image: manage-cf
+    config:
+      platform: linux
+      inputs:
+      - name: repo
+      - name: manifest
+      - name: compiled-app
+      run:
+        path: /bin/bash
+        args:
+        - -exc
+        - |
+          pushd ./repo
+            cf api "${CF_API}" --skip-ssl-validation
+            cf login -u "${CF_USERNAME}" -p "${CF_PASSWORD}"
+
+            cf t -o "${CF_ORG}" -s "${CF_SPACE}"
+
+            cf push -f ../manifest/manifest.yml -p "../compiled-app/${APP_NAME}"*.jar
+          popd
+
+
