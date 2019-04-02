@@ -102,6 +102,7 @@ jobs:
       CF_ORG: ((cf_target_org))
       CF_SPACE: ((cf_target_space))
       APP_NAME: ((app_name))
+      ROUTE: ((route))
     image: manage-cf
     config:
       platform: linux
@@ -118,7 +119,7 @@ jobs:
             cf api "${CF_API}" --skip-ssl-validation
             cf login -u "${CF_USERNAME}" -p "${CF_PASSWORD}" -o "${CF_ORG}" -s "${CF_SPACE}"
 
-            cf push -f ../manifest/manifest.yml -p "../compiled-app/${APP_NAME}"*.jar 
+            cf push -f ../manifest/manifest.yml -p "../compiled-app/${APP_NAME}"*.jar -r "${ROUTE}"
             cf set-env "${APP_NAME}" GIT_REVISION "$(cat ../compiled-app/GIT_REV)"
           popd
 

@@ -5,6 +5,7 @@ set -e -o pipefail
 function deploy() {
     local pipeline=$1
     local git_rev=$2
+    local route=$3
 
     if [[ ! -d .cd ]]; then
         mkdir .cd
@@ -29,7 +30,8 @@ function deploy() {
         -v cf_source_space="${CF_SOURCE_SPACE}" \
         -v cf_target_org="${CF_TARGET_ORG}" \
         -v cf_target_space="${CF_TARGET_SPACE}" \
-        -v git_rev="${git_rev}"
+        -v git_rev="${git_rev}" \
+        -v route="${route}"
 }
 
 if [[ $1 == 'careless-delivery' || $1 == 'cd' ]]; then
@@ -78,6 +80,7 @@ ALIAS:
    sup
 
 OPTIONS:
+   -r                 Route of the app to use in production.
    -o                 Organisation to deploy the productive app to (optional).
    -s                 Space to deploy the productive app to (optional).
 
@@ -101,9 +104,17 @@ SEE ALSO:
 
     if [[ $3 == '-s' ]]; then
         CF_TARGET_SPACE=$4
+        shift 2
     else
         CF_TARGET_SPACE=$(cf t | grep "^space:" | awk '{print $2}')
         APP_NAME="${2}-prod"
+    fi
+
+    if [[ $3 == '-r' ]]; then
+        ROUTE=$4
+        shift 2
+    else
+        echo "Route has to be provided using -r"
     fi
 
     GIT_URL=$(git remote -v | awk '{print $2}' | head -n 1)
