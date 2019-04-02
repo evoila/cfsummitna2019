@@ -119,7 +119,7 @@ jobs:
             cf login -u "${CF_USERNAME}" -p "${CF_PASSWORD}" -o "${CF_ORG}" -s "${CF_SPACE}"
 
             cf push -f ../manifest/manifest.yml -p "../compiled-app/${APP_NAME}"*.jar 
-            cf set-env -e GIT_REVISION "$(cat ../compiled-app/GIT_REV)"
+            cf set-env "${APP_NAME}" GIT_REVISION "$(cat ../compiled-app/GIT_REV)"
           popd
 
 
