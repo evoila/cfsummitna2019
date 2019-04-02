@@ -1,8 +1,29 @@
 #!/bin/bash
 
-set -ex -o pipefail
+set -e -o pipefail
 
-if [[ $1 == 'careless-delivery' ]]; then
+if [[ $1 == 'careless-delivery' || $1 == 'cd' ]]; then
+    if [[ $2 == '--help' ]]; then
+        echo 'NAME:
+   careless-delivery - create a careless continous deployment experience for an already pushed app
+
+USAGE:
+   cf careless-delivery APP_NAME 
+
+ALIAS:
+   cd
+
+OPTIONS:
+
+ENVIRONMENT:
+   CF_USERNAME        Username for the pipeline to access the app deployed to Cloud Foundry 
+   CF_PASSWORD        Password for the pipeline to access the app deployed to Cloud Foundry 
+
+SEE ALSO:
+   push'
+        exit 0
+    fi
+
     GIT_URL=$(git remote -v | awk '{print $2}' | head -n 1)
     APP_NAME="$2"
     CF_API=$(cf t | grep "^api endpoint:" | awk '{print $3}')
