@@ -62,8 +62,13 @@ jobs:
 
             git clone repo "${APP_NAME}"
             pushd "./${APP_NAME}"
-              ./gradlew build
-              cp "build/libs/${APP_NAME}"*.jar ../compiled-app
+              if [[ -e ./gradlew ]]; then
+                ./gradlew build
+                cp "build/libs/${APP_NAME}"*.jar ../compiled-app
+              elif [[ -e ./mvnw ]]; then
+                ./mvnw install
+                cp "target/${APP_NAME}"*.jar ../compiled-app
+              fi
             popd
         caches:
         - path: .gradle/
