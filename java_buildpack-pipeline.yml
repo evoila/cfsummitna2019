@@ -77,8 +77,8 @@ jobs:
         CF_API: ((cf_api))
         CF_USERNAME: ((cf_username))
         CF_PASSWORD: ((cf_password))
-        CF_ORG: ((cf_org))
-        CF_SPACE: ((cf_space))
+        CF_ORG: ((cf_source_org))
+        CF_SPACE: ((cf_source_space))
         APP_NAME: ((app_name))
       image: manage-cf
       config:
@@ -99,8 +99,8 @@ jobs:
       CF_API: ((cf_api))
       CF_USERNAME: ((cf_username))
       CF_PASSWORD: ((cf_password))
-      CF_ORG: ((cf_org))
-      CF_SPACE: ((cf_space))
+      CF_ORG: ((cf_target_org))
+      CF_SPACE: ((cf_target_space))
       APP_NAME: ((app_name))
     image: manage-cf
     config:
