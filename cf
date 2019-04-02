@@ -30,15 +30,16 @@ SEE ALSO:
     CF_ORG=$(cf t | grep "^org:" | awk '{print $2}')
     CF_SPACE=$(cf t | grep "^space:" | awk '{print $2}')
 
-    if [[ ! -d .cd ]] then
+    if [[ ! -d .cd ]]; then
         mkdir .cd
     fi
 
-    BUILDPACK=$(cf a "${APP_NAME}" | grep "^buildpack:" | awk '{print $2}')
+    BUILDPACK=$(cf curl /v2/buildpacks/$(cf curl "/v2/apps?q=name:${APP_NAME}" | jq '.resources[0].entity.detected_buildpack_guid' -r) | jq '.entity.name' -r)
 
     BUILDPACK_PIPELINE="${BUILDPACK}-pipeline.yml"
 
-    PIPELINE=".cf/${BUILDPACK_PIPELINE}"
+    PIPELINE=".cd/${BUILDPACK_PIPELINE}"
+    #touch "${PIPELINE}"
     curl "https://raw.githubusercontent.com/evoila/cfsummitna2019/master/${BUILDPACK_PIPELINE}" -o "${PIPELINE}"
 
     fly -t gstack login -k -u cbrinker@evoila.de -p gst4ckr0cks
