@@ -58,7 +58,9 @@ SEE ALSO:
     CF_ORG=$(cf t | grep "^org:" | awk '{print $2}')
     CF_SPACE=$(cf t | grep "^space:" | awk '{print $2}')
 
-    deploy "${APP_NAME}" "HEAD"
+    GIT_COMMIT=$(git rev-parse HEAD)
+
+    deploy "${APP_NAME}" "${GIT_COMMIT}"
 
 elif [[ $1 == spin-up-prod || $1 == sup ]]; then
     if [[ $2 == '-h' || $2 == '--help' ]]; then
@@ -105,7 +107,7 @@ SEE ALSO:
 
     GIT_REV=$(cf curl "/v2/apps?q=name:${APP_NAME}" | jq '.resources[0].entity.environment_json.GIT_REV' -r)
     if [[ -z "${GIT_REV}" || "${GIT_REV}" == "null" ]]; then
-        GIT_REV="HEAD"
+        GIT_REV=$(git rev-parse HEAD)
     fi
 
     deploy "${APP_NAME}-prod" "${GIT_REV}"

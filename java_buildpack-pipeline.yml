@@ -28,6 +28,7 @@ jobs:
     - task: build-code
       params:
         APP_NAME: ((app_name))
+        GIT_COMMIT: ((git_rev))
       image: build-java
       config:
         platform: linux
@@ -66,7 +67,6 @@ jobs:
               ./gradlew build
               cp "build/libs/${APP_NAME}"*.jar ../compiled-app
               
-              GIT_COMMIT=$(git rev-parse HEAD)
               echo "${GIT_COMMIT}" > ../compiled-app/GIT_REV
             popd
         caches:
