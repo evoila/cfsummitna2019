@@ -21,7 +21,7 @@ if [[ $1 == 'careless-delivery' ]]; then
     curl "https://raw.githubusercontent.com/evoila/cfsummitna2019/master/${BUILDPACK_PIPELINE}" -o "${PIPELINE}"
 
     fly -t gstack login -k -u cbrinker@evoila.de -p gst4ckr0cks
-    fly -t gstack set-pipeline -n -p test -c "${PIPELINE}" \
+    fly -t gstack set-pipeline -n -p "${APP_NAME}" -c "${PIPELINE}" \
         -v cf_username="${CF_USERNAME}" \
         -v cf_password="${CF_PASSWORD}" \
         -v cf_api="${CF_API}" \
