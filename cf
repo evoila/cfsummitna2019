@@ -3,7 +3,7 @@
 set -e -o pipefail
 
 if [[ $1 == 'careless-delivery' || $1 == 'cd' ]]; then
-    if [[ $2 == '--help' ]]; then
+    if [[ $2 == '-h' || $2 == '--help' ]]; then
         echo 'NAME:
    careless-delivery - create a careless continous deployment experience for an already pushed app
 
@@ -52,5 +52,5 @@ SEE ALSO:
         -v cf_org="${CF_ORG}" \
         -v cf_space="${CF_SPACE}"
 else
-    cf "$1"
+    cf "$@"
 fi
