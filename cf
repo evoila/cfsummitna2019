@@ -66,7 +66,7 @@ SEE ALSO:
 
     GIT_COMMIT=$(git rev-parse HEAD)
 
-    deploy "${APP_NAME}" "${GIT_COMMIT}"
+    deploy "${APP_NAME}" "${GIT_COMMIT}" ""
 
 elif [[ $1 == spin-up-prod || $1 == sup ]]; then
     if [[ $2 == '-h' || $2 == '--help' ]]; then
@@ -127,7 +127,7 @@ SEE ALSO:
         GIT_REV=$(git rev-parse HEAD)
     fi
 
-    deploy "${APP_NAME}-prod" "${GIT_REV}"
+    deploy "${APP_NAME}-prod" "${GIT_REV}" "${ROUTE}"
 else
     cf "$@"
 fi

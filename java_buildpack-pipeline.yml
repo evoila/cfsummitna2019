@@ -119,7 +119,13 @@ jobs:
             cf api "${CF_API}" --skip-ssl-validation
             cf login -u "${CF_USERNAME}" -p "${CF_PASSWORD}" -o "${CF_ORG}" -s "${CF_SPACE}"
 
-            cf push -f ../manifest/manifest.yml -p "../compiled-app/${APP_NAME}"*.jar -r "${ROUTE}"
+            if [[ -z "${ROUTE}" ]]; then
+              route_args=()
+            else
+              route_args=(-r "${ROUTE}")
+            fi
+            
+            cf push -f ../manifest/manifest.yml -p "../compiled-app/${APP_NAME}"*.jar "${route_args[@]}"
             cf set-env "${APP_NAME}" GIT_REVISION "$(cat ../compiled-app/GIT_REV)"
           popd
 
