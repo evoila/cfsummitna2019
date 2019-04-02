@@ -21,6 +21,7 @@ jobs:
   - aggregate:
     - get: repo
       trigger: true
+      version: {ref: ((git_rev))}
     - get: build-java
     - get: manage-cf
   - aggregate:
@@ -64,6 +65,9 @@ jobs:
             pushd "./${APP_NAME}"
               ./gradlew build
               cp "build/libs/${APP_NAME}"*.jar ../compiled-app
+              
+              GIT_COMMIT=$(git rev-parse HEAD)
+              echo "${GIT_COMMIT}" > ../compiled-app/GIT_REV
             popd
         caches:
         - path: .gradle/
@@ -87,9 +91,7 @@ jobs:
           - -exc
           - |
             cf api "${CF_API}" --skip-ssl-validation
-            cf login -u "${CF_USERNAME}" -p "${CF_PASSWORD}"
-
-            cf t -o "${CF_ORG}" -s "${CF_SPACE}"
+            cf login -u "${CF_USERNAME}" -p "${CF_PASSWORD}" -o "${CF_ORG}" -s "${CF_SPACE}"
 
             cf create-app-manifest "${APP_NAME}" -p ./manifest/manifest.yml
   - task: push-app
@@ -114,11 +116,10 @@ jobs:
         - |
           pushd ./repo
             cf api "${CF_API}" --skip-ssl-validation
-            cf login -u "${CF_USERNAME}" -p "${CF_PASSWORD}"
+            cf login -u "${CF_USERNAME}" -p "${CF_PASSWORD}" -o "${CF_ORG}" -s "${CF_SPACE}"
 
-            cf t -o "${CF_ORG}" -s "${CF_SPACE}"
-
-            cf push -f ../manifest/manifest.yml -p "../compiled-app/${APP_NAME}"*.jar
+            cf push -f ../manifest/manifest.yml -p "../compiled-app/${APP_NAME}"*.jar 
+            cf set-env -e GIT_REVISION "$(cat ../compiled-app/GIT_REV)"
           popd
 
 
