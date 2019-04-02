@@ -16,7 +16,7 @@ function deploy() {
 
     PIPELINE=".cd/${BUILDPACK_PIPELINE}"
     #touch "${PIPELINE}"
-    curl "https://raw.githubusercontent.com/evoila/cfsummitna2019/master/${BUILDPACK_PIPELINE}" -o "${PIPELINE}"
+    curl --silent "https://raw.githubusercontent.com/evoila/cfsummitna2019/master/${BUILDPACK_PIPELINE}" -o "${PIPELINE}"
 
     fly -t gstack login -k -u cbrinker@evoila.de -p gst4ckr0cks
     fly -t gstack set-pipeline -n -p "${pipeline}" -c "${PIPELINE}" \
