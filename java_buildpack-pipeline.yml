@@ -124,7 +124,7 @@ jobs:
             if [[ -z "${ROUTE}" ]]; then
               cp "${MANIFEST_FILE}" "${UPDATED_MANIFEST_FILE}"
             else
-              spruce json "${MANIFEST_FILE}" | jq --arg ${ROUTE} plip-plop '.applications[0].routes[].route = $route' > "${UPDATED_MANIFEST_FILE}"
+              spruce json "${MANIFEST_FILE}" | jq --arg route "${ROUTE}" '.applications[0].routes = [{ "route": $route }]' > "${UPDATED_MANIFEST_FILE}"
             fi
 
             cf push -f "${UPDATED_MANIFEST_FILE}" -p "../compiled-app/${APP_NAME}"*.jar
