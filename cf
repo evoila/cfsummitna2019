@@ -80,8 +80,7 @@ ALIAS:
    sup
 
 OPTIONS:
-   -n                 Hostname of the app to use in production.
-   -d                 Domain of the app to use in production (optional).
+   -r                 Route of the app to use in production.
    -o                 Organisation to deploy the productive app to (optional).
    -s                 Space to deploy the productive app to (optional).
 
