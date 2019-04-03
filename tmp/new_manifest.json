@@ -1,0 +1,23 @@
+{
+  "applications": [
+    {
+      "buildpacks": [
+        "java_buildpack"
+      ],
+      "disk_quota": "1G",
+      "env": {
+        "Foo": "Bar",
+        "GIT_REVISION": "7c8fc637786df4468f6336264ed32b9d9559ddb5"
+      },
+      "instances": 1,
+      "memory": "1G",
+      "name": "spring-music",
+      "routes": [
+        {
+          "route": "plip-plop"
+        }
+      ],
+      "stack": "cflinuxfs2"
+    }
+  ]
+}

@@ -102,8 +102,7 @@ jobs:
       CF_ORG: ((cf_target_org))
       CF_SPACE: ((cf_target_space))
       APP_NAME: ((app_name))
-      HOSTNAME: ((hostname))
-      DOMAIN: ((domain))
+      ROUTE: ((route))
     image: manage-cf
     config:
       platform: linux
@@ -120,19 +119,15 @@ jobs:
             cf api "${CF_API}" --skip-ssl-validation
             cf login -u "${CF_USERNAME}" -p "${CF_PASSWORD}" -o "${CF_ORG}" -s "${CF_SPACE}"
 
-            if [[ -z "${HOSTNAME}" ]]; then
-              hostname_args=()
+            MANIFEST_FILE=../manifest/manifest.yml
+            UPDATED_MANIFEST_FILE=../updated_manifest.json
+            if [[ -z "${ROUTE}" ]]; then
+              cp "${MANIFEST_FILE}" "${UPDATED_MANIFEST_FILE}"
             else
-              hostname_args=(-n "${HOSTNAME}")
+              spruce json "${MANIFEST_FILE}" | jq --arg ${ROUTE} plip-plop '.applications[0].routes[].route = $route' > "${UPDATED_MANIFEST_FILE}"
             fi
 
-            if [[ -z "${DOMAIN}" ]]; then
-              domain_args=()
-            else
-              domain_args=(-n "${DOMAIN}")
-            fi
-
-            cf push -f ../manifest/manifest.yml -p "../compiled-app/${APP_NAME}"*.jar "${domain_args[@]}" "${hostname_args[@]}"
+            cf push -f "${UPDATED_MANIFEST_FILE}" -p "../compiled-app/${APP_NAME}"*.jar
             cf set-env "${APP_NAME}" GIT_REVISION "$(cat ../compiled-app/GIT_REV)"
           popd
 
