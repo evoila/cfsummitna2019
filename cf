@@ -5,7 +5,8 @@ set -e -o pipefail
 function deploy() {
     local pipeline=$1
     local git_rev=$2
-    local route=$3
+    local hostname=$3
+    local domain=$4
 
     if [[ ! -d .cd ]]; then
         mkdir .cd
@@ -31,7 +32,8 @@ function deploy() {
         -v cf_target_org="${CF_TARGET_ORG}" \
         -v cf_target_space="${CF_TARGET_SPACE}" \
         -v git_rev="${git_rev}" \
-        -v route="${route}"
+        -v hostname="${hostname}" \
+        -v domain="${domain}"
 }
 
 if [[ $1 == 'careless-delivery' || $1 == 'cd' ]]; then
@@ -66,7 +68,7 @@ SEE ALSO:
 
     GIT_COMMIT=$(git rev-parse HEAD)
 
-    deploy "${APP_NAME}" "${GIT_COMMIT}" ""
+    deploy "${APP_NAME}" "${GIT_COMMIT}" "" ""
 
 elif [[ $1 == spin-up-prod || $1 == sup ]]; then
     if [[ $2 == '-h' || $2 == '--help' ]]; then
@@ -80,7 +82,8 @@ ALIAS:
    sup
 
 OPTIONS:
-   -r                 Route of the app to use in production.
+   -n                 Hostname of the app to use in production.
+   -d                 Domain of the app to use in production (optional).
    -o                 Organisation to deploy the productive app to (optional).
    -s                 Space to deploy the productive app to (optional).
 
@@ -110,11 +113,17 @@ SEE ALSO:
         APP_NAME="${2}-prod"
     fi
 
-    if [[ $3 == '-r' ]]; then
-        ROUTE=$4
+    if [[ $3 == '-n' ]]; then
+        HOSTNAME=$4
         shift 2
     else
-        echo "Route has to be provided using -r"
+        echo "$(tput setaf 1)$(tput bold)Hostname has to be provided using -n$(tput sgr0)" >&2
+        exit 2
+    fi
+
+    if [[ $3 == '-d' ]]; then
+        DOMAIN=$4
+        shift 2
     fi
 
     GIT_URL=$(git remote -v | awk '{print $2}' | head -n 1)
@@ -127,7 +136,7 @@ SEE ALSO:
         GIT_REV=$(git rev-parse HEAD)
     fi
 
-    deploy "${APP_NAME}-prod" "${GIT_REV}" "${ROUTE}"
+    deploy "${APP_NAME}-prod" "${GIT_REV}" "${HOSTNAME}" "${DOMAIN}"
 else
     cf "$@"
 fi
